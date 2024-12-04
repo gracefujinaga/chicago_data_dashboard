@@ -185,5 +185,5 @@ def create_forecast_page(grouping_col, title, zipcode = None):
                            components_html=components_html)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004)
-    #app.run(host='0.0.0.0', port=5000)
+    # app.run(host='0.0.0.0', port=5004)
+    app.run(host='0.0.0.0', port=5000)
