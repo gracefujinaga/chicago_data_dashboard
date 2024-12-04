@@ -192,6 +192,8 @@ func processTaxiTrips(data []byte) error {
 
 	for i := 0; i < len(taxi_trips_list); i++ {
 
+		log.Print("inside taxi trips")
+
 		trip_id := taxi_trips_list[i].Trip_id
 		if trip_id == "" {
 			continue
@@ -221,11 +223,13 @@ func processTaxiTrips(data []byte) error {
 		if pickup_centroid_longitude == "" {
 			continue
 		}
+		log.Print("got here 3")
 
 		dropoff_centroid_latitude := taxi_trips_list[i].Dropoff_centroid_latitude
 		if dropoff_centroid_latitude == "" {
 			continue
 		}
+		log.Print("got here 2")
 
 		dropoff_centroid_longitude := taxi_trips_list[i].Dropoff_centroid_longitude
 
@@ -233,18 +237,17 @@ func processTaxiTrips(data []byte) error {
 			continue
 		}
 
-		if i >= 3000 {
-			time.Sleep(1 * time.Minute)
-			log.Print("slept -- staying under geocoder limit")
-		}
+		log.Print("got here 1")
 
 		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
 		if err != nil {
+			log.Print("zip code parse failed")
 			continue
 		}
 
 		pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
 		if err != nil {
+			log.Print("zip code parse failed")
 			continue
 		}
 
