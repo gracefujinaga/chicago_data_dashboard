@@ -250,6 +250,7 @@ func processTaxiTrips(data []byte) error {
 
 		// pickup_zip_code := i
 		// dropoff_zip_code := i
+		log.Print("before trip insert")
 
 		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -270,6 +271,8 @@ func processTaxiTrips(data []byte) error {
 		if err != nil {
 			panic(err)
 		}
+
+		log.Print("inserted into trips")
 	}
 
 	fmt.Println("after inserting data to the API")

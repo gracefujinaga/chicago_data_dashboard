@@ -54,7 +54,7 @@ func init() {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS "taxi_trips" (
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
 		"id"   SERIAL , 
 		"trip_id" VARCHAR(255) UNIQUE, 
 		"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
@@ -75,7 +75,7 @@ func init() {
 
 	queryString := `
 		SELECT COUNT(*) as length
-		FROM taxi_trips;`
+		FROM trips;`
 
 	// Variable to hold the count
 	var length int
