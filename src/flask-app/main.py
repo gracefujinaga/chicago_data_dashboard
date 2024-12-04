@@ -36,6 +36,17 @@ import pandas as pd
 
 import os
 
+
+# # TODO: update this URL as needed 
+#base_url = 'http://localhost:8080/'
+# base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
+
+go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
+base_url = go_microservice_url
+
+print(go_microservice_url)
+print(base_url)
+
 app = Flask(__name__)
 
 # Route for the homepage
@@ -43,37 +54,20 @@ app = Flask(__name__)
 def home():
     return "Welcome to the Chicago Business Intelligence Report!"
 
-# # TODO: update this URL as needed 
-base_url = 'https://go-microservice-550412521327.us-central1.run.app'
-# go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
-#base_url = go_microservice_url
-
-
-# @app.route('/test')
-# def chart():
-#     # Generate a Plotly chart
-#     df = px.data.gapminder()  # Example dataset
-#     fig = px.scatter(df, x="gdpPercap", y="lifeExp", color="continent", size="pop", hover_name="country", log_x=True)
-    
-#     # Convert to HTML string
-#     graph_html = fig.to_html(full_html=False)
-    
-#     return render_template('index.html', graph_html=graph_html)
-
 @app.route('/dropoffs', methods=['GET'])
 def dropoffs():
     zipcode = request.args.get('zipcode', None)
-    return create_forecast_page('dropoff_zip_code', 'Dropoffs', zipcode)
+    return create_forecast_page('dropoff_zip_code', 'Dropoff', zipcode)
 
 @app.route('/pickups', methods=['GET'])
 def pickups():
     zipcode = request.args.get('zipcode', None)
-    return create_forecast_page('dropoff_zip_code', 'Dropoffs', zipcode)
+    return create_forecast_page('pickup_zip_code', 'Pickup', zipcode)
 
 @app.route('/all', methods=['GET'])
 def all_combined():
     zipcode = request.args.get('zipcode', None)
-    return create_forecast_page('dropoff_zip_code', 'Dropoffs', zipcode)
+    return create_forecast_page('zipcode', 'Both Dropoff and Pickup', zipcode)
 
 def create_forecast_page(grouping_col, title, zipcode = None):
     response = requests.get(f'{base_url}req4')
@@ -93,7 +87,6 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     df['day'] = df.index.day
     df['week_of_year'] = df.index.isocalendar().week
     df['date'] = df.index.date
-
 
     if grouping_col == 'zipcode':
         # Duplicate rows for dropoff and pickup
@@ -118,7 +111,7 @@ def create_forecast_page(grouping_col, title, zipcode = None):
      # Create a Plotly bar plot
     fig = px.bar(counts_df, x=grouping_col, y='trip_count', 
                  labels={grouping_col: 'Zip Code', 'trip_count': 'Trip Count'},
-                 title=f'Count of Trips by Zip Code - {grouping_col}')
+                 title=f'Count of Trips by {title} Zip Code')
 
     # Return the plot in HTML format to embed in the template
     graph_html = fig.to_html(full_html=False)
@@ -144,163 +137,10 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     # Return the chart to the template
     return render_template('forecast.html',
                            page_title = title,
-                           forecast_title = f'Forecast for all {grouping_col} zipcodes',
-                           barplot_title = f'Bar Plot for all {grouping_col} zipcodes',
+                           forecast_title = f'Forecast for {title} Zipcodes',
+                           barplot_title = f'Bar Plot for {title} Zipcodes',
                            graph_html=graph_html,
                            forecast_html=forecast_html)
 
-
-# @app.route('/all_zipcodes', methods=['GET'])
-# def analysis():
-#     response = requests.get(f'{base_url}req4')
-#     if response.status_code != 200:
-#         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
-    
-#     data = response.json()
-#     df = pd.DataFrame(data)
-    
-#     # df['pickup_zip_code'] = df['pickup_zip_code'].astype(int)
-#     # df['dropoff_zip_code'] = df['dropoff_zip_code'].astype(int)
-
-#     # Assuming 'trip_end_timestamp' is a string
-#     df['trip_start_timestamp'] = pd.to_datetime(df['trip_start_timestamp'], utc=True)
-#     df['trip_end_timestamp'] = pd.to_datetime(df['trip_end_timestamp'], utc=True)
-
-#     df.set_index('trip_start_timestamp', inplace=True)
-
-#     df['year'] = df.index.year
-#     df['month'] = df.index.month
-#     df['day'] = df.index.day
-#     df['week_of_year'] = df.index.isocalendar().week
-#     df['date'] = df.index.date
-    
-#     dropoff_df = df.copy()
-#     dropoff_df['zipcode'] = dropoff_df['dropoff_zip_code']
-
-#     pickup_df = df.copy()
-#     pickup_df['zipcode'] = pickup_df['pickup_zip_code']
-
-#     # Concatenate the dropoff and pickup DataFrames
-#     final_df = pd.concat([dropoff_df, pickup_df], ignore_index=True)
-
-#     # Optional: Reorder columns to match the original structure
-#     counts_df = final_df.groupby(['zipcode'])['trip_id'].count().reset_index(name='trip_count')
-
-#      # Create a Plotly bar plot
-#     fig = px.bar(counts_df, x='zipcode', y='trip_count', 
-#                  labels={'zipcode': 'Zip Code', 'trip_count': 'Trip Count'},
-#                  title='Count of Trips by Zip Code (Pickup and Dropoff)')
-
-#     # Return the plot in HTML format to embed in the template
-#     graph_html = fig.to_html(full_html=False)
-
-#     return render_template('index.html', graph_html=graph_html)
-
-
-# @app.route('/forecast_all_zip', methods=['GET'])
-# def forecast_all_zip():
-#     response = requests.get(f'{base_url}req4')
-#     if response.status_code != 200:
-#         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
-
-#     data = response.json()
-#     df = pd.DataFrame(data)
-
-#     df['trip_start_timestamp'] = pd.to_datetime(df['trip_start_timestamp'], utc=True)
-#     df['trip_end_timestamp'] = pd.to_datetime(df['trip_end_timestamp'], utc=True)
-
-#     df.set_index('trip_start_timestamp', inplace=True)
-
-#     df['year'] = df.index.year
-#     df['month'] = df.index.month
-#     df['day'] = df.index.day
-#     df['week_of_year'] = df.index.isocalendar().week
-#     df['date'] = df.index.date
-
-#     # Duplicate rows for dropoff and pickup
-#     dropoff_df = df.copy()
-#     dropoff_df['zipcode'] = dropoff_df['dropoff_zip_code']
-
-#     pickup_df = df.copy()
-#     pickup_df['zipcode'] = pickup_df['pickup_zip_code']
-
-#     # Combine into a single DataFrame
-#     total_df = pd.concat([dropoff_df, pickup_df], ignore_index=True)
-
-#     # Optional: Reorder columns to match the original structure
-#     counts_df = total_df.groupby(['zipcode'])['trip_id'].count().reset_index(name='trip_count')
-
-#      # Create a Plotly bar plot
-#     fig = px.bar(counts_df, x='zipcode', y='trip_count', 
-#                  labels={'zipcode': 'Zip Code', 'trip_count': 'Trip Count'},
-#                  title='Count of Trips by Zip Code (Pickup and Dropoff)')
-
-#     # Return the plot in HTML format to embed in the template
-#     graph_html = fig.to_html(full_html=False)
-
-#     # Group by date and calculate total trips
-#     trip_count_df = total_df.groupby(['date'])['trip_id'].count().reset_index(name='Total_Trips')
-#     plot_df = trip_count_df.rename(columns={'date': 'ds', 'Total_Trips': 'y'})
-
-#     # Train the Prophet model
-#     model = Prophet(yearly_seasonality=True, daily_seasonality=True)
-#     model.fit(plot_df)
-
-#     # Create future dates and make predictions
-#     future_dates = model.make_future_dataframe(periods=50, freq='W')
-#     forecast = model.predict(future_dates)
-
-#     # Prepare Plotly figure for forecast
-#     forecast_fig = plot_plotly(model, forecast)
-
-#     # Convert the figure to HTML
-#     forecast_html = forecast_fig.to_html(full_html=False)
-
-#     # Return the chart to the template
-#     return render_template('forecast.html', 
-#                            graph_html=graph_html,
-#                            forecast_html=forecast_html)
-
-
-   
-
-# @app.route('/all_dropoff', methods=['GET'])
-# def req4():
-#     response = requests.get(f'{base_url}req4')
-#     if response.status_code != 200:
-#         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
-    
-#     data = response.json()
-#     df = pd.DataFrame(data)
-#     return data
-
-
-# @app.route('/all_pickup', methods=['GET'])
-# def req4():
-#     response = requests.get(f'{base_url}req4')
-#     if response.status_code != 200:
-#         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
-    
-#     data = response.json()
-#     df = pd.DataFrame(data)
-#     return data
-
-
-# @app.route('/all/<param>', methods=['GET'])
-# def req9(param):
-#     # Construct the URL with the passed parameter
-#     response = requests.get(f'{base_url}req4')
-    
-#     # Check if the response is successful
-#     if response.status_code != 200:
-#         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
-    
-#     data = response.json()
-#     df = pd.DataFrame(data)
-    
-#     # Return the response data
-#     return jsonify(data)
-
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5004)

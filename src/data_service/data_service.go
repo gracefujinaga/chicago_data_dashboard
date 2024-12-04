@@ -279,7 +279,7 @@ func fetch_demographics(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json"
+	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?limit=100"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -368,7 +368,7 @@ func fetch_permits(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json"
+	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json?limit=100"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -638,7 +638,7 @@ func fetch_covid(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
+	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json?limit=100"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)

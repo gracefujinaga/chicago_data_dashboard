@@ -67,7 +67,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 
 		// TODO: can change this as necessary
 		// change this back to 1000
-		if offset >= 20000 {
+		if offset >= 30000 {
 			break
 		}
 
@@ -143,7 +143,7 @@ func fetch_transportation_paginated() {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS "trips_test_client" (
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
 						"id"   SERIAL , 
 						"trip_id" VARCHAR(255) UNIQUE, 
 						"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
@@ -253,10 +253,10 @@ func processTaxiTrips(data []byte) error {
 		// 	continue
 		// }
 
-		pickup_zip_code := "11234"
-		dropoff_zip_code := "11234"
+		pickup_zip_code := i
+		dropoff_zip_code := i
 
-		sql := `INSERT INTO trips_test_client ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
+		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			ON CONFLICT (trip_id) DO NOTHING;`
 
