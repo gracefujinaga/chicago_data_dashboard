@@ -29,7 +29,7 @@ steps:
       - '--port'
       - '5000'
       - '--allow-unauthenticated'
-      - '--set-env-vars'
+      #- '--set-env-vars'
      # - 'GO_MICROSERVICE_URL=https://your-go-service-url'  # Pass URL of the Go microservice to Flask
 
 timeout: '900s'
