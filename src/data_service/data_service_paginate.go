@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -61,7 +62,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 	fmt.Println("before fetching ALL data")
 
 	for {
-		if offset >= 10000 {
+		if offset >= 5000 {
 			break
 		}
 
@@ -234,6 +235,8 @@ func processTaxiTrips(data []byte) error {
 
 		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
 		if err != nil {
+			time.Sleep(1 * time.Minute)
+			log.Print("slept -- staying under geocoder limit")
 			continue
 		}
 

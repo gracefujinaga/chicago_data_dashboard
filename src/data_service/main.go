@@ -99,7 +99,7 @@ func init() {
 
 	log.Print("length: ", length)
 
-	if length < 1750 {
+	if length < 1000 {
 		log.Print("fetching transportation data")
 		fetch_transportation_paginated()
 	}
