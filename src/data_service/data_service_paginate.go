@@ -62,7 +62,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 	fmt.Println("before fetching ALL data")
 
 	for {
-		if offset >= 1000 {
+		if offset >= 0 { // run this one time
 			break
 		}
 
