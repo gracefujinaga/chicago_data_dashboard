@@ -54,7 +54,7 @@ func init() {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
+	create_table := `CREATE TABLE IF NOT EXISTS "taxi_trips" (
 		"id"   SERIAL , 
 		"trip_id" VARCHAR(255) UNIQUE, 
 		"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
@@ -75,7 +75,7 @@ func init() {
 
 	queryString := `
 		SELECT COUNT(*) as length
-		FROM trips;`
+		FROM taxi_trips;`
 
 	// Variable to hold the count
 	var length int
@@ -96,6 +96,8 @@ func init() {
 	fetch_demographics(db)
 	fetch_permits(db)
 	fetch_covid(db)
+
+	log.Print("length: ", length)
 
 	if length < 1750 {
 		log.Print("fetching transportation data")

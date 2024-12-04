@@ -219,7 +219,7 @@ func fetch_permits(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json?limit=100"
+	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
