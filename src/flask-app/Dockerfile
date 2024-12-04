@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY requirements.txt .
+COPY src/flask-app/requirements.txt .
 
 # Install system dependencies required for building Python packages
 RUN apt-get update && apt-get install -y \
@@ -32,9 +32,7 @@ RUN pip install prophet
 RUN pip install -r requirements.txt
 
 # Copy the rest of the application code
-COPY . .
-# Define environment variable for Flask
-ENV FLASK_APP=main.py
+COPY src/flask-app .
 
 EXPOSE 5000
 
