@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -60,20 +61,12 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 
 	fmt.Println("before fetching ALL data")
 
-	// Fetch paginated data
-	// limit to 10,000 rows
-
 	for {
-
-		// TODO: can change this as necessary
-		// change this back to 1000
-		if offset >= 20000 {
+		if offset > 0 { // run this one time
 			break
 		}
 
-		// TODO: fix this back to this uncommented line after
 		url := fmt.Sprintf("%s?$limit=%d&$offset=%d", config.BaseURL, config.Limit, offset)
-		//url := fmt.Sprintf("%s?$limit=%d&$offset=%d", config.BaseURL, 1000, offset)
 		fmt.Printf("Fetching: %s\n", url)
 
 		tr := &http.Transport{
@@ -134,16 +127,15 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 Taxi Trips
 **********************************************
 */
-
 func fetch_transportation_paginated() {
 	fmt.Println("starting fetch")
-	drop_table := `drop table if exists trips_all`
+	drop_table := `drop table if exists trips`
 	_, err := db.Exec(drop_table)
 	if err != nil {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS "trips_test_client" (
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
 						"id"   SERIAL , 
 						"trip_id" VARCHAR(255) UNIQUE, 
 						"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
@@ -163,18 +155,16 @@ func fetch_transportation_paginated() {
 	}
 
 	taxiConfig := PaginationConfig{
-		//BaseURL: "https://data.cityofchicago.org/resource/wrvz-psew.json",
 		BaseURL: "https://data.cityofchicago.org/resource/ajtu-isnz.json",
 		Limit:   1000,
 		Process: processTaxiTrips,
 	}
 
-	// rideshareConfig := PaginationConfig{
-	// 	//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
-	// 	BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
-	// 	Limit:   1000,
-	// 	Process: processTaxiTrips,
-	// }
+	rideshareConfig := PaginationConfig{
+		BaseURL: "https://data.cityofchicago.org/resource/aesv-xzh6.json",
+		Limit:   1000,
+		Process: processTaxiTrips,
+	}
 
 	// Use 5 concurrent workers for pagination
 	if err := PaginateAPI(taxiConfig, 5); err != nil {
@@ -183,11 +173,11 @@ func fetch_transportation_paginated() {
 		fmt.Println("Finished processing trips data.")
 	}
 
-	// if err := PaginateAPI(rideshareConfig, 5); err != nil {
-	// 	fmt.Printf("Error during pagination: %v\n", err)
-	// } else {
-	// 	fmt.Println("Finished processing trips data.")
-	// }
+	if err := PaginateAPI(rideshareConfig, 5); err != nil {
+		fmt.Printf("Error during pagination: %v\n", err)
+	} else {
+		fmt.Println("Finished processing trips data.")
+	}
 }
 
 func processTaxiTrips(data []byte) error {
@@ -201,6 +191,8 @@ func processTaxiTrips(data []byte) error {
 	}
 
 	for i := 0; i < len(taxi_trips_list); i++ {
+
+		log.Print("inside taxi trips")
 
 		trip_id := taxi_trips_list[i].Trip_id
 		if trip_id == "" {
@@ -231,11 +223,13 @@ func processTaxiTrips(data []byte) error {
 		if pickup_centroid_longitude == "" {
 			continue
 		}
+		log.Print("got here 3")
 
 		dropoff_centroid_latitude := taxi_trips_list[i].Dropoff_centroid_latitude
 		if dropoff_centroid_latitude == "" {
 			continue
 		}
+		log.Print("got here 2")
 
 		dropoff_centroid_longitude := taxi_trips_list[i].Dropoff_centroid_longitude
 
@@ -243,24 +237,29 @@ func processTaxiTrips(data []byte) error {
 			continue
 		}
 
-		// dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
-		// if err != nil {
-		// 	continue
-		// }
+		log.Print("got here 1")
 
-		// pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
-		// if err != nil {
-		// 	continue
-		// }
+		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
+		if err != nil {
+			log.Print("zip code parse failed")
+			continue
+		}
 
-		pickup_zip_code := "11234"
-		dropoff_zip_code := "11234"
+		pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
+		if err != nil {
+			log.Print("zip code parse failed")
+			continue
+		}
 
-		sql := `INSERT INTO trips_test_client ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
+		// pickup_zip_code := i
+		// dropoff_zip_code := i
+		log.Print("before trip insert")
+
+		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			ON CONFLICT (trip_id) DO NOTHING;`
 
-		_, err := db.Exec(
+		_, err = db.Exec(
 			sql,
 			trip_id,
 			trip_start_timestamp,
@@ -275,6 +274,8 @@ func processTaxiTrips(data []byte) error {
 		if err != nil {
 			panic(err)
 		}
+
+		log.Print("inserted into trips")
 	}
 
 	fmt.Println("after inserting data to the API")

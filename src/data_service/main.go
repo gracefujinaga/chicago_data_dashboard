@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"database/sql"
 
@@ -24,7 +25,7 @@ func init() {
 
 	// OPTION 1 - Postgress application running on localhost
 	//db_connection := "user=postgres dbname=chicago_business_intelligence password=root host=localhost sslmode=disable port = 5432"
-	//db_connection := "user=postgres dbname=chicago_db password=root host=localhost sslmode=disable"
+	// db_connection := "user=postgres dbname=chicago_db password=root host=localhost sslmode=disable"
 
 	// OPTION 2
 	// Docker container for the Postgres microservice - uncomment when deploy with host.docker.internal
@@ -53,23 +54,59 @@ func init() {
 		panic(err)
 	}
 
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
+		"id"   SERIAL , 
+		"trip_id" VARCHAR(255) UNIQUE, 
+		"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
+		"trip_end_timestamp" TIMESTAMP WITH TIME ZONE, 
+		"pickup_centroid_latitude" DOUBLE PRECISION, 
+		"pickup_centroid_longitude" DOUBLE PRECISION, 
+		"dropoff_centroid_latitude" DOUBLE PRECISION, 
+		"dropoff_centroid_longitude" DOUBLE PRECISION, 
+		"pickup_zip_code" VARCHAR(255), 
+		"dropoff_zip_code" VARCHAR(255), 
+		PRIMARY KEY ("id") 
+	);`
+
+	_, _err := db.Exec(create_table)
+	if _err != nil {
+		panic(_err)
+	}
+
+	queryString := `
+		SELECT COUNT(*) as length
+		FROM trips;`
+
+	// Variable to hold the count
+	var length int
+
+	// Execute the query and scan the result into the length variable
+	err = db.QueryRow(queryString).Scan(&length)
+	if err != nil {
+		log.Fatalf("Failed to query database: %v", err)
+	}
+
+	log.Print("getting first batch of data ...")
+
 	// todo: commment back in but im at 95% of my google cloud budget
 	geocoder.ApiKey = "AIzaSyCDhgH3J7Utkk_WbKJyKI_Wox4SziNh7JU"
+
+	// get the right data
+	fetch_ccvi(db)
+	fetch_demographics(db)
+	fetch_permits(db)
+	fetch_covid(db)
+
+	log.Print("length: ", length)
+
+	if length < 1200 {
+		log.Print("fetching transportation data")
+		fetch_transportation_paginated()
+	}
 }
 
 func main() {
 	log.Print("starting CBI Microservices ...")
-
-	// TODO: uncomment
-	fetch_ccvi(db)
-	fetch_demographics(db)
-
-	// // //functions that use the pagination func
-	// fetch_transportation(db)
-	// fetch_permits(db)
-	// fetch_covid(db)
-
-	fetch_transportation_paginated()
 
 	// Determine port for HTTP service.
 	log.Print("starting server...")
@@ -90,9 +127,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//TODO: uncomment
-	// for {
-	// 	fetch_permits()
-	// 	time.Sleep(24 * time.Hour)
-	// }
+	// get a new set of permits every day
+	for {
+		fetch_permits(db)
+		time.Sleep(24 * time.Hour)
+	}
 }

@@ -1,0 +1,53 @@
+<html>
+        <head>
+            <title>Chicago Business Intelligence Report</title>
+            <style>
+                body {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                }
+                h1 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                p {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .link-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .api-link {
+                    background-color: #72bcd4; 
+                    color: white;
+                    padding: 15px 32px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    margin: 10px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    width: 100%;
+                }
+                .api-link:hover {
+                    background-color: #72bcd4;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Welcome to the Chicago Business Intelligence Report</h1>
+            <p>Available Endpoints:</p>
+            <div class="link-container">
+                <a href="/all" class="api-link">All Data (optional_zipcode)</a>
+                <a href="/dropoffs" class="api-link">Dropoffs (optional_zipcode)</a>
+                <a href="/pickups" class="api-link">Pickups (optional_zipcode)</a>
+            </div>
+        </body>
+    </html>

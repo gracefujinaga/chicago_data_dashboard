@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -105,155 +106,6 @@ func GetZipCode(latitude string, longitude string) (string, error) {
 
 /*
 *********************************************
-Taxi Trips
-**********************************************
-*/
-
-func getTransportationData(db *sql.DB, url string) {
-
-	fmt.Println("starting transportation")
-
-	res, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-	body, _ := ioutil.ReadAll(res.Body)
-
-	var taxi_trips_list TaxiTripsJsonRecords
-	json.Unmarshal(body, &taxi_trips_list)
-
-	for i := 0; i < len(taxi_trips_list); i++ {
-
-		trip_id := taxi_trips_list[i].Trip_id
-		if trip_id == "" {
-			continue
-		}
-
-		// if trip start/end timestamp doesn't have the length of 23 chars in the format "0000-00-00T00:00:00.000"
-		// skip this record
-
-		// get Trip_start_timestamp
-		trip_start_timestamp := taxi_trips_list[i].Trip_start_timestamp
-		if len(trip_start_timestamp) < 23 {
-			continue
-		}
-
-		// get Trip_end_timestamp
-		trip_end_timestamp := taxi_trips_list[i].Trip_end_timestamp
-		if len(trip_end_timestamp) < 23 {
-			continue
-		}
-
-		pickup_centroid_latitude := taxi_trips_list[i].Pickup_centroid_latitude
-		if pickup_centroid_latitude == "" {
-			continue
-		}
-
-		pickup_centroid_longitude := taxi_trips_list[i].Pickup_centroid_longitude
-		if pickup_centroid_longitude == "" {
-			continue
-		}
-
-		dropoff_centroid_latitude := taxi_trips_list[i].Dropoff_centroid_latitude
-		if dropoff_centroid_latitude == "" {
-			continue
-		}
-
-		dropoff_centroid_longitude := taxi_trips_list[i].Dropoff_centroid_longitude
-		if dropoff_centroid_longitude == "" {
-			continue
-		}
-
-		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
-		if err != nil {
-			// do more error checking
-			continue
-		}
-
-		pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
-		if err != nil {
-			// do more error checking
-			continue
-		}
-
-		// TODO: UPDATE THIS LOGIC BASED ON THE URL
-
-		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
-			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-
-		////
-
-		_, err = db.Exec(
-			sql,
-			trip_id,
-			trip_start_timestamp,
-			trip_end_timestamp,
-			pickup_centroid_latitude,
-			pickup_centroid_longitude,
-			dropoff_centroid_latitude,
-			dropoff_centroid_longitude,
-			pickup_zip_code,
-			dropoff_zip_code)
-
-		if err != nil {
-			panic(err)
-		}
-
-	}
-
-}
-
-func fetch_transportation(db *sql.DB) {
-	fmt.Println("begin trips")
-
-	// Data Collection needed from two data sources:
-	// 1. https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew
-	// 2. https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p
-
-	drop_table := `drop table if exists trips`
-	_, err := db.Exec(drop_table)
-	if err != nil {
-		panic(err)
-	}
-
-	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
-						"id"   SERIAL , 
-						"trip_id" VARCHAR(255) UNIQUE, 
-						"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
-						"trip_end_timestamp" TIMESTAMP WITH TIME ZONE, 
-						"pickup_centroid_latitude" DOUBLE PRECISION, 
-						"pickup_centroid_longitude" DOUBLE PRECISION, 
-						"dropoff_centroid_latitude" DOUBLE PRECISION, 
-						"dropoff_centroid_longitude" DOUBLE PRECISION, 
-						"pickup_zip_code" VARCHAR(255), 
-						"dropoff_zip_code" VARCHAR(255), 
-						PRIMARY KEY ("id") 
-					);`
-
-	_, _err := db.Exec(create_table)
-	if _err != nil {
-		fmt.Println("failed to create table")
-		panic(_err)
-	}
-
-	// While doing unit-testing keep the limit value to 500
-	// later you could change it to 1000, 2000, 10,000, etc.
-	getTransportationData(db, "https://data.cityofchicago.org/resource/wrvz-psew.json")
-
-	getTransportationData(db, "https://data.cityofchicago.org/resource/m6dm-c72p.json")
-
-	// create a new table
-	// pull a copy of the old table
-	// create a new table with records to add from 2024
-
-	//get TransportationData for that new table and update a new table with a join
-
-	fmt.Println("end trips")
-
-}
-
-/*
-*********************************************
 Demographics
 **********************************************
 */
@@ -279,7 +131,7 @@ func fetch_demographics(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json"
+	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?$limit=50"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -291,8 +143,7 @@ func fetch_demographics(db *sql.DB) {
 	var demographics_list DemographicsJsonRecords
 	json.Unmarshal(body, &demographics_list)
 
-	//TODO uncomment the length of 50
-	for i := 0; i < len(demographics_list[:50]); i++ {
+	for i := 0; i < len(demographics_list); i++ {
 
 		// get all of the fields
 		// only keep the record if it has all of the necessary fields
@@ -368,7 +219,7 @@ func fetch_permits(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json"
+	var url = "https://data.cityofchicago.org/resource/ydr8-5enu?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -427,20 +278,6 @@ func fetch_permits(db *sql.DB) {
 			continue
 		}
 
-		// get Trip_start_timestamp
-		// application_start_date_time := permitsList[i].ApplicationStartDate
-		// if len(application_start_date_time) < 23 {
-		// 	fmt.Println("skipped")
-		// 	continue
-		// }
-
-		// // get Trip_end_timestamp
-		// issue_timestamp := permitsList[i].IssueDate
-		// if len(issue_timestamp) < 23 {
-		// 	fmt.Println("skipped")
-		// 	continue
-		// }
-
 		// Use geocoding to find the zipcode
 		zipcode, err := GetZipCode(permitsList[i].Latitude, permitsList[i].Longitude)
 		if err != nil {
@@ -494,7 +331,7 @@ func fetch_ccvi(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json"
+	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -575,45 +412,6 @@ func fetch_ccvi(db *sql.DB) {
 	}
 }
 
-/*
-Covid Data
-*/
-// func fetch_covid() {
-// 	drop_table := `drop table if exists covid`
-// 	_, err := db.Exec(drop_table)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	create_table := `CREATE TABLE IF NOT EXISTS "covid" (
-// 		"id" SERIAL,
-// 		"zipcode" TEXT,
-// 		"week_start" TIMESTAMP WITH TIME ZONE,
-// 		"test_rate_weekly" DOUBLE PRECISION,
-// 		"percent_tested_positive" DOUBLE PRECISION,
-// 		"cases_weekly" INT
-// 	);`
-
-// 	_, _err := db.Exec(create_table)
-// 	if _err != nil {
-// 		panic(_err)
-// 	}
-
-// 	covidConfig := PaginationConfig{
-// 		BaseURL: "https://data.cityofchicago.org/resource/yhhz-zm2v.json",
-// 		Limit:   1000,
-// 		Process: process_covid,
-// 	}
-
-// 	// Use 5 concurrent workers for pagination
-// 	if err := PaginateAPI(covidConfig, 5); err != nil {
-// 		fmt.Printf("Error during pagination: %v\n", err)
-// 	} else {
-// 		fmt.Println("Finished processing covid data.")
-// 	}
-
-// }
-
 func fetch_covid(db *sql.DB) {
 
 	fmt.Println("get covid")
@@ -638,7 +436,7 @@ func fetch_covid(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
+	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -650,6 +448,8 @@ func fetch_covid(db *sql.DB) {
 	err = json.Unmarshal(body, &covidList)
 	if err != nil {
 		panic(err)
+		log.Print("failed to unmarshal covidList")
+		return
 	}
 
 	for i := 0; i < len(covidList); i++ {
@@ -702,61 +502,3 @@ func fetch_covid(db *sql.DB) {
 	fmt.Println("end covid")
 
 }
-
-// func process_covid(data []byte) error {
-
-// 	var covidList CovidJsonStruct
-// 	err := json.Unmarshal(data, &covidList)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	for i := 0; i < len(covidList); i++ {
-
-// 		zipcode := covidList[i].Zipcode
-// 		if zipcode == "" {
-// 			continue
-// 		}
-
-// 		week_start := covidList[i].Week_start
-// 		if len(week_start) < 23 || week_start == "" {
-// 			continue
-// 		}
-
-// 		test_rate_weekly := covidList[i].Test_rate_weekly
-// 		if test_rate_weekly == "" {
-// 			continue
-// 		}
-
-// 		percent_tested_positive := covidList[i].Percent_tested_positive
-// 		if percent_tested_positive == "" {
-// 			continue
-// 		}
-
-// 		cases_weekly := covidList[i].Cases_weekly
-// 		if cases_weekly == "" {
-// 			continue
-// 		}
-
-// 		// Insert into the database
-// 		sql := `INSERT INTO covid ("zipcode", "week_start", "test_rate_weekly", "percent_tested_positive", "cases_weekly")
-// 			values($1, $2, $3, $4, $5)`
-
-// 		_, err = db.Exec(
-// 			sql,
-// 			zipcode,
-// 			week_start,
-// 			test_rate_weekly,
-// 			percent_tested_positive,
-// 			cases_weekly,
-// 		)
-
-// 		if err != nil {
-// 			fmt.Println("Error inserting into database:", err)
-// 			panic(err)
-// 		}
-
-// 	}
-
-// 	return nil
-// }
