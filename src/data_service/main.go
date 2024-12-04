@@ -69,10 +69,12 @@ func init() {
 
 	log.Print("getting first batch of data ...")
 
-	if length < 15000 {
-		log.Print("fetching transportation data")
-		fetch_transportation_paginated()
-	}
+	// if length < 15000 {
+	// 	log.Print("fetching transportation data")
+	// 	fetch_transportation_paginated()
+	// }
+
+	fetch_transportation_paginated()
 
 	// todo: commment back in but im at 95% of my google cloud budget
 	geocoder.ApiKey = "AIzaSyCDhgH3J7Utkk_WbKJyKI_Wox4SziNh7JU"
