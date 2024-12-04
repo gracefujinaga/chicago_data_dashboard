@@ -1,0 +1,38 @@
+steps:
+  # Steps to build a docker image for go-microservice, push it to container registry, and deploy it to Cloud Run.
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/assignment6-project-441620/go-microservice'
+      - '-f'
+      - 'src/data_service/Dockerfile'  # Path to your Dockerfile (within the src/data_service directory)  
+      - '.'  # Build context should be the root directory to include everything in src/data_service
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ['push', 'gcr.io/assignment6-project-441620/go-microservice']
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'go-microservice'
+      - '--image'
+      - 'gcr.io/assignment6-project-441620/go-microservice'
+      - '--region'
+      - 'us-central1'
+      - '--add-cloudsql-instances'
+      - 'assignment6-project-441620:us-central1:mypostgres'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8080'
+      - '--allow-unauthenticated'
+
+timeout: '900s'
+options:
+  logging: CLOUD_LOGGING_ONLY
+images:
+  - 'gcr.io/assignment6-project-441620/go-microservice'
+
