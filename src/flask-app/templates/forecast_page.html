@@ -3,46 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Aligns items from the top */
+            align-items: center;
+            height: 100vh;
+            margin: 0;
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
+            padding-top: 20px; /* Adds space at the top */
         }
-        h1, h2 {
-            text-align: center;
+        h1{
+            margin: 10px 0; /* Prevents too much margin stacking */
+            color:#72bcd4; 
         }
-        .chart-container {
-            margin: 20px 0;
+        h2 {
+            margin: 10px 0; /* Prevents too much margin stacking */
         }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 500px;
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%; /* Adjust width if needed */
+        }
+        .graph-container {
+            margin-bottom: 30px;
         }
     </style>
 </head>
+
 <body>
-    <h1>{{ title }}</h1>
+    <h1>{{page_title}}</h1>
 
-    <!-- Bar Chart -->
-    <div class="chart-container">
-        <h2>Bar Chart</h2>
-        <iframe srcdoc="{{ bar_html | safe }}"></iframe>
-    </div>
+    <div class="content-container">
+        <h2>{{barplot_title}}</h2>
+        <div class="graph-container">
+            {{ graph_html|safe }}
+        </div>
 
-    <!-- Forecast Plot -->
-    <div class="chart-container">
-        <h2>Forecast</h2>
-        <iframe srcdoc="{{ forecast_html | safe }}"></iframe>
-    </div>
-
-    <!-- Forecast Components -->
-    <div class="chart-container">
-        <h2>Forecast Components</h2>
-        <iframe srcdoc="{{ components_html | safe }}"></iframe>
+        <h2>{{forecast_title}}</h2>
+        <div class="graph-container">
+            {{ forecast_html|safe }}
+        </div>
     </div>
 </body>
 </html>

@@ -36,15 +36,9 @@ import pandas as pd
 
 import os
 
-
-# # TODO: update this URL as needed 
-#base_url = 'http://localhost:8080/'
-#base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
-
+# get url from the docker container
 go_microservice_url = os.getenv("go_microservice_url")
 base_url = go_microservice_url
-
-#print(go_microservice_url)
 print(base_url)
 
 app = Flask(__name__)
@@ -52,7 +46,7 @@ app = Flask(__name__)
 # Route for the homepage
 @app.route('/', methods=['GET'])
 def home():
-    return "Welcome to the Chicago Business Intelligence Report!"
+    return render_template('homepage.html')
 
 @app.route('/dropoffs', methods=['GET'])
 def dropoffs():
@@ -135,7 +129,7 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     forecast_html = forecast_fig.to_html(full_html=False)
 
     # Return the chart to the template
-    return render_template('forecast.html',
+    return render_template('forecast_page.html',
                            page_title = title,
                            forecast_title = f'Forecast for {title} Zipcodes',
                            barplot_title = f'Bar Plot for {title} Zipcodes',
@@ -143,4 +137,4 @@ def create_forecast_page(grouping_col, title, zipcode = None):
                            forecast_html=forecast_html)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004)
+    app.run(host='0.0.0.0', port=5000)
