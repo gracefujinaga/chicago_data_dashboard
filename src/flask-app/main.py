@@ -44,9 +44,9 @@ def home():
     return "Welcome to the Chicago Business Intelligence Report!"
 
 # # TODO: update this URL as needed 
-#base_url = 'https://go-microservice-550412521327.us-central1.run.app'
-go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
-base_url = go_microservice_url
+base_url = 'https://go-microservice-550412521327.us-central1.run.app'
+# go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
+#base_url = go_microservice_url
 
 
 # @app.route('/test')

@@ -1,82 +1,19 @@
 steps:
-  # Steps to pull a docker image for pgadmin, push it to container registry, and deploy it to Cloud Run.
-  - name: "gcr.io/cloud-builders/docker"
-    args: ['pull', 'dpage/pgadmin4']
-
-  - name: "gcr.io/cloud-builders/docker"
-    args: ['tag', 'dpage/pgadmin4', 'gcr.io/assignment6-project-441620/pgadmin']
-
-  - name: "gcr.io/cloud-builders/docker"
-    args: ['push', 'gcr.io/assignment6-project-441620/pgadmin']
-
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      - 'pg-admin'
-      - '--image'
-      - 'gcr.io/assignment6-project-441620/pgadmin'
-      - '--region'
-      - 'us-central1'
-      - '--add-cloudsql-instances'
-      - 'assignment6-project-441620:us-central1:mypostgres'
-      - '--platform'
-      - 'managed'
-      - '--port'
-      - '80'
-      - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'PGADMIN_DEFAULT_EMAIL=user@gmail.com'
-      - '--set-env-vars'
-      - 'PGADMIN_DEFAULT_PASSWORD=SuperSecret'
-
-  # Steps to build a docker image for go-microservice, push it to container registry, and deploy it to Cloud Run.
-  - name: "gcr.io/cloud-builders/docker"
-    args:
-      - 'build'
-      - '-t'
-      - 'gcr.io/assignment6-project-441620/go-microservice'
-      - '-f'
-      - 'src/data_service/Dockerfile'  # Path to your Dockerfile (within the src/data_service directory)
-      - '.'  # Build context should be the root directory to include everything in src/data_service
-
-  - name: "gcr.io/cloud-builders/docker"
-    args: ['push', 'gcr.io/assignment6-project-441620/go-microservice']
-
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      - 'go-microservice'
-      - '--image'
-      - 'gcr.io/assignment6-project-441620/go-microservice'
-      - '--region'
-      - 'us-central1'
-      - '--add-cloudsql-instances'
-      - 'assignment6-project-441620:us-central1:mypostgres'
-      - '--platform'
-      - 'managed'
-      - '--port'
-      - '8080'
-      - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'GO_MICROSERVICE_URL=https://<go-microservice-url>'
-
-  # Steps to build a docker image for flask app, push it to container registry, and deploy it to Cloud Run.
+  # Step 1: Build the Flask app Docker image
   - name: "gcr.io/cloud-builders/docker"
     args:
       - 'build'
       - '-t'
       - 'gcr.io/assignment6-project-441620/flask-app'
       - '-f'
-      - 'src/flask_app/Dockerfile'  # Path to your Flask Dockerfile
-      - '.'  # Build context should be the root directory to include everything in src/flask_app
+      - 'src/flask-app/Dockerfile'  # Path to your Flask Dockerfile
+      - 'src/flask-app'  # Build context should be the root directory (or src/flask_app if Dockerfile is inside that folder)
 
+  # Step 2: Push the Docker image to Google Container Registry
   - name: "gcr.io/cloud-builders/docker"
     args: ['push', 'gcr.io/assignment6-project-441620/flask-app']
 
+  # Step 3: Deploy the Flask app to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -93,12 +30,10 @@ steps:
       - '5000'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'GO_MICROSERVICE_URL=https://<go-microservice-url>'  # Passing URL to Flask app
+     # - 'GO_MICROSERVICE_URL=https://your-go-service-url'  # Pass URL of the Go microservice to Flask
 
 timeout: '900s'
 options:
   logging: CLOUD_LOGGING_ONLY
 images:
-  - 'gcr.io/assignment6-project-441620/go-microservice'
-  - 'gcr.io/assignment6-project-441620/pgadmin'
   - 'gcr.io/assignment6-project-441620/flask-app'

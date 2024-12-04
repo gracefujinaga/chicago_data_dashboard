@@ -33,9 +33,10 @@ RUN pip install -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
+# Define environment variable for Flask
+ENV FLASK_APP=main.py
 
 EXPOSE 5000
 
 # Specify the default command to run your application
-#CMD ["python", "main.py"]
 CMD [ "python", "main.py"]
