@@ -279,7 +279,7 @@ func fetch_demographics(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json"
+	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?limit=100"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -291,8 +291,7 @@ func fetch_demographics(db *sql.DB) {
 	var demographics_list DemographicsJsonRecords
 	json.Unmarshal(body, &demographics_list)
 
-	//TODO uncomment the length of 50
-	for i := 0; i < len(demographics_list[:50]); i++ {
+	for i := 0; i < len(demographics_list); i++ {
 
 		// get all of the fields
 		// only keep the record if it has all of the necessary fields
@@ -368,7 +367,7 @@ func fetch_permits(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json"
+	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json?limit=100"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -638,7 +637,7 @@ func fetch_covid(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
+	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json?limit=100"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)

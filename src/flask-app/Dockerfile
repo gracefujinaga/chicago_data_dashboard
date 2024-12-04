@@ -36,6 +36,7 @@ COPY . .
 
 EXPOSE 5000
 
+ENV go_microservice_url="https://go-microservice-550412521327.us-central1.run.app/"
+
 # Specify the default command to run your application
-#CMD ["python", "main.py"]
 CMD [ "python", "main.py"]

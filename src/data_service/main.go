@@ -53,23 +53,40 @@ func init() {
 		panic(err)
 	}
 
+	queryString := `
+		SELECT COUNT(*) as length
+		FROM trips;`
+
+	// Variable to hold the count
+	var length int
+
+	// Execute the query and scan the result into the length variable
+	err = db.QueryRow(queryString).Scan(&length)
+	if err != nil {
+		log.Fatalf("Failed to query database: %v", err)
+	}
+
+	log.Print("getting first batch of data ...")
+
+	if length < 15000 {
+		log.Print("fetching transportation data")
+		fetch_transportation_paginated()
+	}
+
 	// todo: commment back in but im at 95% of my google cloud budget
 	geocoder.ApiKey = "AIzaSyCDhgH3J7Utkk_WbKJyKI_Wox4SziNh7JU"
+
+	// TODO: uncomment
+	// add in the right geocoder api key
+	// fetch_ccvi(db)
+	// fetch_demographics(db)
+	// fetch_permits(db)
+	// fetch_covid(db)
+
 }
 
 func main() {
 	log.Print("starting CBI Microservices ...")
-
-	// TODO: uncomment
-	fetch_ccvi(db)
-	fetch_demographics(db)
-
-	// // //functions that use the pagination func
-	// fetch_transportation(db)
-	// fetch_permits(db)
-	// fetch_covid(db)
-
-	fetch_transportation_paginated()
 
 	// Determine port for HTTP service.
 	log.Print("starting server...")
