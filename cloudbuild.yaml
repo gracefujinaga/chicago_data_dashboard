@@ -61,9 +61,44 @@ steps:
       - '--port'
       - '8080'
       - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'GO_MICROSERVICE_URL=https://<go-microservice-url>'
+
+  # Steps to build a docker image for flask app, push it to container registry, and deploy it to Cloud Run.
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/assignment6-project-441620/flask-app'
+      - '-f'
+      - 'src/flask_app/Dockerfile'  # Path to your Flask Dockerfile
+      - '.'  # Build context should be the root directory to include everything in src/flask_app
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ['push', 'gcr.io/assignment6-project-441620/flask-app']
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'flask-app'
+      - '--image'
+      - 'gcr.io/assignment6-project-441620/flask-app'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '5000'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'GO_MICROSERVICE_URL=https://<go-microservice-url>'  # Passing URL to Flask app
+
 timeout: '900s'
 options:
   logging: CLOUD_LOGGING_ONLY
 images:
   - 'gcr.io/assignment6-project-441620/go-microservice'
   - 'gcr.io/assignment6-project-441620/pgadmin'
+  - 'gcr.io/assignment6-project-441620/flask-app'
