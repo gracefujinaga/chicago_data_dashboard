@@ -39,10 +39,10 @@ import os
 
 # # TODO: update this URL as needed 
 #base_url = 'http://localhost:8080/'
-base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
+#base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
 
-# go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
-# base_url = go_microservice_url
+go_microservice_url = os.getenv("go_microservice_url")
+base_url = go_microservice_url
 
 #print(go_microservice_url)
 print(base_url)
@@ -143,4 +143,4 @@ def create_forecast_page(grouping_col, title, zipcode = None):
                            forecast_html=forecast_html)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5004)

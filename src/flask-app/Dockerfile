@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY src/flask-app/requirements.txt .
+COPY requirements.txt .
 
 # Install system dependencies required for building Python packages
 RUN apt-get update && apt-get install -y \
@@ -32,9 +32,11 @@ RUN pip install prophet
 RUN pip install -r requirements.txt
 
 # Copy the rest of the application code
-COPY src/flask-app .
+COPY . .
 
 EXPOSE 5000
+
+ENV go_microservice_url="https://go-microservice-550412521327.us-central1.run.app/"
 
 # Specify the default command to run your application
 CMD [ "python", "main.py"]

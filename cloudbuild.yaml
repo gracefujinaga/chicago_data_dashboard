@@ -38,7 +38,7 @@ steps:
       - '-t'
       - 'gcr.io/assignment6-project-441620/go-microservice'
       - '-f'
-      - 'src/data_service/Dockerfile'  # Path to your Dockerfile (within the src/data_service directory)
+      - 'src/data_service/Dockerfile'  # Path to your Dockerfile (within the src/data_service directory)  
       - '.'  # Build context should be the root directory to include everything in src/data_service
 
   - name: "gcr.io/cloud-builders/docker"
@@ -72,7 +72,8 @@ steps:
       - 'gcr.io/assignment6-project-441620/flask-app'
       - '-f'
       - 'src/flask-app/Dockerfile'  # Path to your Flask Dockerfile
-      - '.'  # Build context should be the root directory to include everything in src/flask-app
+      - './src/flask-app'  
+      # - '.'  # Build context should be the root directory to include everything in src/flask-app
 
   - name: "gcr.io/cloud-builders/docker"
     args: ['push', 'gcr.io/assignment6-project-441620/flask-app']
