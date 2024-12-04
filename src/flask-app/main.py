@@ -36,20 +36,40 @@ import pandas as pd
 
 import os
 
+import logging
+
+# setup logging
+logging.basicConfig(level=logging.INFO)
+
 # get url from the docker container
 go_microservice_url = os.getenv("go_microservice_url")
 base_url = go_microservice_url
 print(base_url)
+
 
 app = Flask(__name__)
 
 # Route for the homepage
 @app.route('/', methods=['GET'])
 def home():
+    app.logger.info('Home page accessed')
     return render_template('homepage.html')
+
+@app.route('/test', methods=['GET'])
+def test():
+    app.logger.info('Test page accessed')
+
+    response = requests.get(f'{base_url}req4')
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from Go service'}), 500
+
+    data = response.json()
+    df = pd.DataFrame(data) 
+    return data
 
 @app.route('/dropoffs', methods=['GET'])
 def dropoffs():
+
     zipcode = request.args.get('zipcode', None)
     return create_forecast_page('dropoff_zip_code', 'Dropoff', zipcode)
 
@@ -60,16 +80,20 @@ def pickups():
 
 @app.route('/all', methods=['GET'])
 def all_combined():
+    app.logger.info('all page accessed')
     zipcode = request.args.get('zipcode', None)
     return create_forecast_page('zipcode', 'Both Dropoff and Pickup', zipcode)
 
 def create_forecast_page(grouping_col, title, zipcode = None):
+    app.logger.info('hit create forecast page')
     response = requests.get(f'{base_url}req4')
     if response.status_code != 200:
         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
 
     data = response.json()
     df = pd.DataFrame(data)
+
+    app.logger.info(f"df length 1: {len(df)}")
 
     df['trip_start_timestamp'] = pd.to_datetime(df['trip_start_timestamp'], utc=True)
     df['trip_end_timestamp'] = pd.to_datetime(df['trip_end_timestamp'], utc=True)
@@ -82,6 +106,8 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     df['week_of_year'] = df.index.isocalendar().week
     df['date'] = df.index.date
 
+    app.logger.info(f"df length 2: {len(df)}")
+
     if grouping_col == 'zipcode':
         # Duplicate rows for dropoff and pickup
         dropoff_df = df.copy()
@@ -93,6 +119,8 @@ def create_forecast_page(grouping_col, title, zipcode = None):
         # Combine into a single DataFrame
         df = pd.concat([dropoff_df, pickup_df], ignore_index=True)
 
+    app.logger.info(f"df length 2: {len(df)}")
+
     if zipcode:
         if zipcode not in df['pickup_zip_code'].values and zipcode not in df['dropoff_zip_code'].values:
             err_string = f"zipcode ({zipcode}) does not exist"
@@ -101,6 +129,8 @@ def create_forecast_page(grouping_col, title, zipcode = None):
 
     # Optional: Reorder columns to match the original structure
     counts_df = df.groupby([grouping_col])['trip_id'].count().reset_index(name='trip_count')
+
+    app.logger.info(counts_df)
 
      # Create a Plotly bar plot
     fig = px.bar(counts_df, x=grouping_col, y='trip_count', 
@@ -114,6 +144,7 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     trip_count_df = df.groupby(['date'])['trip_id'].count().reset_index(name='Total_Trips')
     plot_df = trip_count_df.rename(columns={'date': 'ds', 'Total_Trips': 'y'})
 
+    app.logger.info(plot_df)
     # Train the Prophet model
     model = Prophet(yearly_seasonality=True, daily_seasonality=True)
     model.fit(plot_df)
@@ -137,4 +168,5 @@ def create_forecast_page(grouping_col, title, zipcode = None):
                            forecast_html=forecast_html)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    #app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5004)
