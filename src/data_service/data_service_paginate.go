@@ -169,12 +169,12 @@ func fetch_transportation_paginated() {
 		Process: processTaxiTrips,
 	}
 
-	rideshareConfig := PaginationConfig{
-		//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
-		BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
-		Limit:   1000,
-		Process: processTaxiTrips,
-	}
+	// rideshareConfig := PaginationConfig{
+	// 	//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
+	// 	BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
+	// 	Limit:   1000,
+	// 	Process: processTaxiTrips,
+	// }
 
 	// Use 5 concurrent workers for pagination
 	if err := PaginateAPI(taxiConfig, 5); err != nil {
