@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -435,7 +436,7 @@ func fetch_covid(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json?limit=100"
+	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -446,7 +447,10 @@ func fetch_covid(db *sql.DB) {
 	var covidList CovidJsonStruct
 	err = json.Unmarshal(body, &covidList)
 	if err != nil {
+		// panic(err)
 		panic(err)
+		log.Print("failed to unmarshal covidList")
+		return
 	}
 
 	for i := 0; i < len(covidList); i++ {

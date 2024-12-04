@@ -54,6 +54,25 @@ func init() {
 		panic(err)
 	}
 
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
+		"id"   SERIAL , 
+		"trip_id" VARCHAR(255) UNIQUE, 
+		"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
+		"trip_end_timestamp" TIMESTAMP WITH TIME ZONE, 
+		"pickup_centroid_latitude" DOUBLE PRECISION, 
+		"pickup_centroid_longitude" DOUBLE PRECISION, 
+		"dropoff_centroid_latitude" DOUBLE PRECISION, 
+		"dropoff_centroid_longitude" DOUBLE PRECISION, 
+		"pickup_zip_code" VARCHAR(255), 
+		"dropoff_zip_code" VARCHAR(255), 
+		PRIMARY KEY ("id") 
+	);`
+
+	_, _err := db.Exec(create_table)
+	if _err != nil {
+		panic(_err)
+	}
+
 	queryString := `
 		SELECT COUNT(*) as length
 		FROM trips;`
@@ -69,13 +88,6 @@ func init() {
 
 	log.Print("getting first batch of data ...")
 
-	// if length < 15000 {
-	// 	log.Print("fetching transportation data")
-	// 	fetch_transportation_paginated()
-	// }
-
-	fetch_transportation_paginated()
-
 	// todo: commment back in but im at 95% of my google cloud budget
 	geocoder.ApiKey = "AIzaSyCDhgH3J7Utkk_WbKJyKI_Wox4SziNh7JU"
 
@@ -84,6 +96,11 @@ func init() {
 	fetch_demographics(db)
 	fetch_permits(db)
 	fetch_covid(db)
+
+	if length < 15000 {
+		log.Print("fetching transportation data")
+		fetch_transportation_paginated()
+	}
 }
 
 func main() {
