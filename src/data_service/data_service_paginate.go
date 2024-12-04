@@ -60,20 +60,12 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 
 	fmt.Println("before fetching ALL data")
 
-	// Fetch paginated data
-	// limit to 10,000 rows
-
 	for {
-
-		// TODO: can change this as necessary
-		// change this back to 1000
-		if offset >= 2000 {
+		if offset >= 10000 {
 			break
 		}
 
-		// TODO: fix this back to this uncommented line after
 		url := fmt.Sprintf("%s?$limit=%d&$offset=%d", config.BaseURL, config.Limit, offset)
-		//url := fmt.Sprintf("%s?$limit=%d&$offset=%d", config.BaseURL, 1000, offset)
 		fmt.Printf("Fetching: %s\n", url)
 
 		tr := &http.Transport{
@@ -134,10 +126,9 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 Taxi Trips
 **********************************************
 */
-
 func fetch_transportation_paginated() {
 	fmt.Println("starting fetch")
-	drop_table := `drop table if exists trips_all`
+	drop_table := `drop table if exists trips`
 	_, err := db.Exec(drop_table)
 	if err != nil {
 		panic(err)
@@ -171,7 +162,8 @@ func fetch_transportation_paginated() {
 
 	rideshareConfig := PaginationConfig{
 		//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
-		BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
+		//BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
+		BaseURL: "https://data.cityofchicago.org/resource/aesv-xzh6.json",
 		Limit:   100,
 		Process: processTaxiTrips,
 	}
@@ -243,24 +235,24 @@ func processTaxiTrips(data []byte) error {
 			continue
 		}
 
-		// dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
-		// if err != nil {
-		// 	continue
-		// }
+		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
+		if err != nil {
+			continue
+		}
 
-		// pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
-		// if err != nil {
-		// 	continue
-		// }
+		pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
+		if err != nil {
+			continue
+		}
 
-		pickup_zip_code := i
-		dropoff_zip_code := i
+		// pickup_zip_code := i
+		// dropoff_zip_code := i
 
 		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			ON CONFLICT (trip_id) DO NOTHING;`
 
-		_, err := db.Exec(
+		_, err = db.Exec(
 			sql,
 			trip_id,
 			trip_start_timestamp,
