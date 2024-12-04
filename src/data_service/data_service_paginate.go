@@ -129,13 +129,13 @@ Taxi Trips
 */
 func fetch_transportation_paginated() {
 	fmt.Println("starting fetch")
-	drop_table := `drop table if exists taxi_trips`
+	drop_table := `drop table if exists trips`
 	_, err := db.Exec(drop_table)
 	if err != nil {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS "taxi_trips" (
+	create_table := `CREATE TABLE IF NOT EXISTS "trips" (
 						"id"   SERIAL , 
 						"trip_id" VARCHAR(255) UNIQUE, 
 						"trip_start_timestamp" TIMESTAMP WITH TIME ZONE, 
