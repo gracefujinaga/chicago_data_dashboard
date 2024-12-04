@@ -62,7 +62,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 	fmt.Println("before fetching ALL data")
 
 	for {
-		if offset > 0 { // run this one time
+		if offset >= 1500 { // run this one time
 			break
 		}
 
@@ -156,13 +156,13 @@ func fetch_transportation_paginated() {
 
 	taxiConfig := PaginationConfig{
 		BaseURL: "https://data.cityofchicago.org/resource/ajtu-isnz.json",
-		Limit:   1000,
+		Limit:   750,
 		Process: processTaxiTrips,
 	}
 
 	rideshareConfig := PaginationConfig{
 		BaseURL: "https://data.cityofchicago.org/resource/aesv-xzh6.json",
-		Limit:   1000,
+		Limit:   750,
 		Process: processTaxiTrips,
 	}
 
