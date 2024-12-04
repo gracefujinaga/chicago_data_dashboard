@@ -85,15 +85,12 @@ def all_combined():
     return create_forecast_page('zipcode', 'Both Dropoff and Pickup', zipcode)
 
 def create_forecast_page(grouping_col, title, zipcode = None):
-    app.logger.info('hit create forecast page')
     response = requests.get(f'{base_url}req4')
     if response.status_code != 200:
         return jsonify({'error': 'Failed to fetch data from Go service'}), 500
 
     data = response.json()
     df = pd.DataFrame(data)
-
-    app.logger.info(f"df length 1: {len(df)}")
 
     df['trip_start_timestamp'] = pd.to_datetime(df['trip_start_timestamp'], utc=True)
     df['trip_end_timestamp'] = pd.to_datetime(df['trip_end_timestamp'], utc=True)
@@ -106,8 +103,6 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     df['week_of_year'] = df.index.isocalendar().week
     df['date'] = df.index.date
 
-    app.logger.info(f"df length 2: {len(df)}")
-
     if grouping_col == 'zipcode':
         # Duplicate rows for dropoff and pickup
         dropoff_df = df.copy()
@@ -119,18 +114,13 @@ def create_forecast_page(grouping_col, title, zipcode = None):
         # Combine into a single DataFrame
         df = pd.concat([dropoff_df, pickup_df], ignore_index=True)
 
-    app.logger.info(f"df length 2: {len(df)}")
-
     if zipcode:
         if zipcode not in df['pickup_zip_code'].values and zipcode not in df['dropoff_zip_code'].values:
             err_string = f"zipcode ({zipcode}) does not exist"
             return jsonify({'error': err_string}), 500
         df = df.loc[df[grouping_col] == zipcode]
 
-    # Optional: Reorder columns to match the original structure
     counts_df = df.groupby([grouping_col])['trip_id'].count().reset_index(name='trip_count')
-
-    app.logger.info(counts_df)
 
      # Create a Plotly bar plot
     fig = px.bar(counts_df, x=grouping_col, y='trip_count', 
@@ -144,7 +134,6 @@ def create_forecast_page(grouping_col, title, zipcode = None):
     trip_count_df = df.groupby(['date'])['trip_id'].count().reset_index(name='Total_Trips')
     plot_df = trip_count_df.rename(columns={'date': 'ds', 'Total_Trips': 'y'})
 
-    app.logger.info(plot_df)
     # Train the Prophet model
     model = Prophet(yearly_seasonality=True, daily_seasonality=True)
     model.fit(plot_df)
@@ -155,18 +144,21 @@ def create_forecast_page(grouping_col, title, zipcode = None):
 
     # Prepare Plotly figure for forecast
     forecast_fig = plot_plotly(model, forecast)
-
-    # Convert the figure to HTML
     forecast_html = forecast_fig.to_html(full_html=False)
 
+    components_fig = plot_components_plotly(model, forecast)
+    components_html = components_fig.to_html(full_html=False)
+
     # Return the chart to the template
-    return render_template('forecast_page.html',
+    return render_template('forecast.html',
                            page_title = title,
                            forecast_title = f'Forecast for {title} Zipcodes',
                            barplot_title = f'Bar Plot for {title} Zipcodes',
+                           components_title=f'Components for {title} Zipcodes',
                            graph_html=graph_html,
-                           forecast_html=forecast_html)
+                           forecast_html=forecast_html,
+                           components_html=components_html)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5004)
     #app.run(host='0.0.0.0', port=5004)

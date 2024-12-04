@@ -164,7 +164,7 @@ func fetch_transportation_paginated() {
 		//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
 		//BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
 		BaseURL: "https://data.cityofchicago.org/resource/aesv-xzh6.json",
-		Limit:   100,
+		Limit:   1000,
 		Process: processTaxiTrips,
 	}
 
@@ -235,18 +235,18 @@ func processTaxiTrips(data []byte) error {
 			continue
 		}
 
-		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
-		if err != nil {
-			continue
-		}
+		// dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
+		// if err != nil {
+		// 	continue
+		// }
 
-		pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
-		if err != nil {
-			continue
-		}
+		// pickup_zip_code, err := GetZipCode(pickup_centroid_latitude, pickup_centroid_longitude)
+		// if err != nil {
+		// 	continue
+		// }
 
-		// pickup_zip_code := i
-		// dropoff_zip_code := i
+		pickup_zip_code := i
+		dropoff_zip_code := i
 
 		sql := `INSERT INTO trips ("trip_id", "trip_start_timestamp", "trip_end_timestamp", "pickup_centroid_latitude", "pickup_centroid_longitude", "dropoff_centroid_latitude", "dropoff_centroid_longitude", "pickup_zip_code", 
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
