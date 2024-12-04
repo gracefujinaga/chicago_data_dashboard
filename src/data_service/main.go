@@ -97,7 +97,7 @@ func init() {
 	fetch_permits(db)
 	fetch_covid(db)
 
-	if length < 15000 {
+	if length < 1750 {
 		log.Print("fetching transportation data")
 		fetch_transportation_paginated()
 	}
