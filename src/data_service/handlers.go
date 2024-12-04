@@ -235,7 +235,7 @@ func req_3_handler(w http.ResponseWriter, r *http.Request) {
 func req_4_handler(w http.ResponseWriter, r *http.Request) {
 	query := `
 		SELECT *
-		FROM trips
+		FROM taxi_trips
 	`
 
 	// Fetch the data from the database using the provided query string
