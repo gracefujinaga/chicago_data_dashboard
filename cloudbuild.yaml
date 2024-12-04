@@ -61,8 +61,8 @@ steps:
       - '--port'
       - '8080'
       - '--allow-unauthenticated'
-      # - '--set-env-vars'
-      # - 'GO_MICROSERVICE_URL=https://go-microservice-550412521327.us-central1.run.app'
+      - '--set-env-vars'
+      - 'GO_MICROSERVICE_URL=https://go-microservice-550412521327.us-central1.run.app'
 
   # Steps to build a docker image for flask app, push it to container registry, and deploy it to Cloud Run.
   - name: "gcr.io/cloud-builders/docker"
@@ -71,8 +71,8 @@ steps:
       - '-t'
       - 'gcr.io/assignment6-project-441620/flask-app'
       - '-f'
-      - 'src/flask_app/Dockerfile'  # Path to your Flask Dockerfile
-      - '.'  # Build context should be the root directory to include everything in src/flask_app
+      - 'src/flask-app/Dockerfile'  # Path to your Flask Dockerfile
+      - '.'  # Build context should be the root directory to include everything in src/flask-app
 
   - name: "gcr.io/cloud-builders/docker"
     args: ['push', 'gcr.io/assignment6-project-441620/flask-app']
@@ -92,8 +92,8 @@ steps:
       - '--port'
       - '5000'
       - '--allow-unauthenticated'
-      # - '--set-env-vars'
-      # - 'GO_MICROSERVICE_URL=https://go-microservice-550412521327.us-central1.run.app'  # Passing URL to Flask app
+      - '--set-env-vars'
+      - 'GO_MICROSERVICE_URL=https://go-microservice-550412521327.us-central1.run.app'  # Passing URL to Flask app
 
 timeout: '900s'
 options:

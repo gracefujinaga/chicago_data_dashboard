@@ -291,8 +291,7 @@ func fetch_demographics(db *sql.DB) {
 	var demographics_list DemographicsJsonRecords
 	json.Unmarshal(body, &demographics_list)
 
-	//TODO uncomment the length of 50
-	for i := 0; i < len(demographics_list[:50]); i++ {
+	for i := 0; i < len(demographics_list); i++ {
 
 		// get all of the fields
 		// only keep the record if it has all of the necessary fields
