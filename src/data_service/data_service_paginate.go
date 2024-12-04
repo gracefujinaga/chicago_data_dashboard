@@ -67,7 +67,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 
 		// TODO: can change this as necessary
 		// change this back to 1000
-		if offset >= 11000 {
+		if offset >= 20000 {
 			break
 		}
 
@@ -169,12 +169,12 @@ func fetch_transportation_paginated() {
 		Process: processTaxiTrips,
 	}
 
-	rideshareConfig := PaginationConfig{
-		//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
-		BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
-		Limit:   1000,
-		Process: processTaxiTrips,
-	}
+	// rideshareConfig := PaginationConfig{
+	// 	//BaseURL: "https://data.cityofchicago.org/resource/m6dm-c72p.json",
+	// 	BaseURL: "https://data.cityofchicago.org/resource/n26f-ihde.json",
+	// 	Limit:   1000,
+	// 	Process: processTaxiTrips,
+	// }
 
 	// Use 5 concurrent workers for pagination
 	if err := PaginateAPI(taxiConfig, 5); err != nil {
@@ -183,11 +183,11 @@ func fetch_transportation_paginated() {
 		fmt.Println("Finished processing trips data.")
 	}
 
-	if err := PaginateAPI(rideshareConfig, 5); err != nil {
-		fmt.Printf("Error during pagination: %v\n", err)
-	} else {
-		fmt.Println("Finished processing trips data.")
-	}
+	// if err := PaginateAPI(rideshareConfig, 5); err != nil {
+	// 	fmt.Printf("Error during pagination: %v\n", err)
+	// } else {
+	// 	fmt.Println("Finished processing trips data.")
+	// }
 }
 
 func processTaxiTrips(data []byte) error {
