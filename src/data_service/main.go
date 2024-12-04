@@ -73,14 +73,15 @@ func init() {
 		fetch_transportation_paginated()
 	}
 
-	// TODO: uncomment
-	fetch_ccvi(db)
-	fetch_demographics(db)
-	fetch_permits(db)
-	fetch_covid(db)
-
 	// todo: commment back in but im at 95% of my google cloud budget
 	geocoder.ApiKey = "AIzaSyCDhgH3J7Utkk_WbKJyKI_Wox4SziNh7JU"
+
+	// TODO: uncomment
+	// add in the right geocoder api key
+	// fetch_ccvi(db)
+	// fetch_demographics(db)
+	// fetch_permits(db)
+	// fetch_covid(db)
 
 }
 
