@@ -279,10 +279,12 @@ func fetch_permits(db *sql.DB) {
 		}
 
 		// Use geocoding to find the zipcode
-		zipcode, err := GetZipCode(permitsList[i].Latitude, permitsList[i].Longitude)
-		if err != nil {
-			zipcode = "NaN" // Use "NaN" if geocoding fails
-		}
+		// zipcode, err := GetZipCode(permitsList[i].Latitude, permitsList[i].Longitude)
+		// if err != nil {
+		// 	zipcode = "NaN" // Use "NaN" if geocoding fails
+		// }
+
+		zipcode := i
 
 		// Insert into the database
 		sql := `INSERT INTO building_permits ("permit_number", "permit_type", "permit_status", "community_area", "zipcode", "application_start_date", "issue_date") 
