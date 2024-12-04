@@ -131,7 +131,7 @@ func fetch_demographics(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?limit=100"
+	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?$limit=50"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -219,7 +219,7 @@ func fetch_permits(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/ydr8-5enu.json"
+	var url = "https://data.cityofchicago.org/resource/ydr8-5enu?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -279,12 +279,10 @@ func fetch_permits(db *sql.DB) {
 		}
 
 		// Use geocoding to find the zipcode
-		// zipcode, err := GetZipCode(permitsList[i].Latitude, permitsList[i].Longitude)
-		// if err != nil {
-		// 	zipcode = "NaN" // Use "NaN" if geocoding fails
-		// }
-
-		zipcode := i
+		zipcode, err := GetZipCode(permitsList[i].Latitude, permitsList[i].Longitude)
+		if err != nil {
+			zipcode = "NaN" // Use "NaN" if geocoding fails
+		}
 
 		// Insert into the database
 		sql := `INSERT INTO building_permits ("permit_number", "permit_type", "permit_status", "community_area", "zipcode", "application_start_date", "issue_date") 
@@ -333,7 +331,7 @@ func fetch_ccvi(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json"
+	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -438,7 +436,7 @@ func fetch_covid(db *sql.DB) {
 		panic(_err)
 	}
 
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
+	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json?$limit=50"
 	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -449,7 +447,6 @@ func fetch_covid(db *sql.DB) {
 	var covidList CovidJsonStruct
 	err = json.Unmarshal(body, &covidList)
 	if err != nil {
-		// panic(err)
 		panic(err)
 		log.Print("failed to unmarshal covidList")
 		return

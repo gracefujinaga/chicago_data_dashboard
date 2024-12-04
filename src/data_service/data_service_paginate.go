@@ -62,7 +62,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 	fmt.Println("before fetching ALL data")
 
 	for {
-		if offset >= 5000 {
+		if offset >= 1000 {
 			break
 		}
 
@@ -233,10 +233,13 @@ func processTaxiTrips(data []byte) error {
 			continue
 		}
 
-		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
-		if err != nil {
+		if i >= 3000 {
 			time.Sleep(1 * time.Minute)
 			log.Print("slept -- staying under geocoder limit")
+		}
+
+		dropoff_zip_code, err := GetZipCode(dropoff_centroid_latitude, dropoff_centroid_longitude)
+		if err != nil {
 			continue
 		}
 
