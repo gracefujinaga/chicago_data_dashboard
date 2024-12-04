@@ -67,7 +67,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 
 		// TODO: can change this as necessary
 		// change this back to 1000
-		if offset >= 11000 {
+		if offset >= 20000 {
 			break
 		}
 
@@ -183,11 +183,11 @@ func fetch_transportation_paginated() {
 		fmt.Println("Finished processing trips data.")
 	}
 
-	if err := PaginateAPI(rideshareConfig, 5); err != nil {
-		fmt.Printf("Error during pagination: %v\n", err)
-	} else {
-		fmt.Println("Finished processing trips data.")
-	}
+	// if err := PaginateAPI(rideshareConfig, 5); err != nil {
+	// 	fmt.Printf("Error during pagination: %v\n", err)
+	// } else {
+	// 	fmt.Println("Finished processing trips data.")
+	// }
 }
 
 func processTaxiTrips(data []byte) error {
