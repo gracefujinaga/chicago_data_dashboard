@@ -252,7 +252,7 @@ func processTaxiTrips(data []byte) error {
 			"dropoff_zip_code") values($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			ON CONFLICT (trip_id) DO NOTHING;`
 
-		_, err = db.Exec(
+		_, err := db.Exec(
 			sql,
 			trip_id,
 			trip_start_timestamp,
