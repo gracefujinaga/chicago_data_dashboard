@@ -39,12 +39,12 @@ import os
 
 # # TODO: update this URL as needed 
 #base_url = 'http://localhost:8080/'
-# base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
+base_url = 'https://go-microservice-550412521327.us-central1.run.app/'
 
-go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
-base_url = go_microservice_url
+# go_microservice_url = os.getenv("GO_MICROSERVICE_URL")
+# base_url = go_microservice_url
 
-print(go_microservice_url)
+#print(go_microservice_url)
 print(base_url)
 
 app = Flask(__name__)
