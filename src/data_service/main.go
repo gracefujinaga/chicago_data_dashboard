@@ -100,6 +100,8 @@ func init() {
 	log.Print("length: ", length)
 
 	if length < 1200 {
+		// if code ran correctly - should be ~1500 entries
+		// doing this to save my geocoder api calls
 		log.Print("fetching transportation data")
 		fetch_transportation_paginated()
 	}

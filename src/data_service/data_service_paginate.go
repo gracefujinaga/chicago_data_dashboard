@@ -62,7 +62,7 @@ func PaginateAPI(config PaginationConfig, workers int) error {
 	fmt.Println("before fetching ALL data")
 
 	for {
-		if offset > 0 { // run this one time
+		if offset >= 22500 {
 			break
 		}
 
@@ -156,13 +156,13 @@ func fetch_transportation_paginated() {
 
 	taxiConfig := PaginationConfig{
 		BaseURL: "https://data.cityofchicago.org/resource/ajtu-isnz.json",
-		Limit:   1000,
+		Limit:   750,
 		Process: processTaxiTrips,
 	}
 
 	rideshareConfig := PaginationConfig{
 		BaseURL: "https://data.cityofchicago.org/resource/aesv-xzh6.json",
-		Limit:   1000,
+		Limit:   750,
 		Process: processTaxiTrips,
 	}
 
@@ -172,6 +172,9 @@ func fetch_transportation_paginated() {
 	} else {
 		fmt.Println("Finished processing trips data.")
 	}
+
+	// wait 2 minutes to let the geocoder API limit reset
+	time.Sleep(1 * time.Minute)
 
 	if err := PaginateAPI(rideshareConfig, 5); err != nil {
 		fmt.Printf("Error during pagination: %v\n", err)

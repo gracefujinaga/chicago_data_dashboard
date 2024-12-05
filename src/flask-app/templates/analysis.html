@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
     <style>
         body {
             display: flex;
@@ -32,25 +33,10 @@
         }
     </style>
 </head>
-
 <body>
     <h1>{{page_title}}</h1>
-
-    <div class="content-container">
-        <h2>{{barplot_title}}</h2>
-        <div class="graph-container">
-            {{ graph_html|safe }}
-        </div>
-
-        <h2>{{forecast_title}}</h2>
-        <div class="graph-container">
-            {{ forecast_html|safe }}
-        </div>
-
-        <h2>{{components_title}}</h2>
-        <div class="graph-container">
-            {{ components_html|safe }}
-        </div>
+    <div>
+        {{ graph|safe }}
     </div>
 </body>
 </html>

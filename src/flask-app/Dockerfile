@@ -27,6 +27,7 @@ RUN pip install cython
 RUN pip install numpy
 RUN pip install matplotlib
 RUN pip install pystan
+RUN pip install cmdstanpy
 RUN pip install prophet
 
 RUN pip install -r requirements.txt
