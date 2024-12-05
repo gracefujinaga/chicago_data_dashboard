@@ -68,6 +68,7 @@ steps:
   - name: "gcr.io/cloud-builders/docker"
     args:
       - 'build'
+      - '--memory=2Gi'
       - '-t'
       - 'gcr.io/assignment6-project-441620/flask-app'
       - '-f'
