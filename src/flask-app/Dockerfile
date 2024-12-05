@@ -23,11 +23,11 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir --upgrade pip 
 
 RUN pip install --upgrade setuptools
-RUN pip install cython
-RUN pip install numpy
-RUN pip install matplotlib
-RUN pip install pystan
-RUN pip install prophet
+RUN pip install cython==3.0.11
+RUN pip install numpy==1.26.4
+RUN pip install matplotlib==3.9.3
+RUN pip install pystan==2.19.1.1
+RUN pip install prophet==1.1.6
 
 RUN pip install -r requirements.txt
 
